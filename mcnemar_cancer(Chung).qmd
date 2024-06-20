@@ -1,0 +1,514 @@
+---
+title: "mcnemar_cancer"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+library(magrittr);library(data.table);library(DTComPair)
+
+
+
+alist <- lapply(1:3, function(x){readxl::read_excel("data/data.xlsx", sheet = x) %>% data.table})
+names(alist) <- readxl::excel_sheets("data/data.xlsx")
+
+alist
+names(alist)
+
+# paired_layouts_sen_spec <- lapply(alist, function(a){
+#   paired.layout1 <- tab.paired(d=기준값, y1=`BAT-26`, y2=ACVR, data=a)
+#   paired.layout2 <- tab.paired(d=기준값, y1=`BAT-26`, y2=DEFB, data=a)
+#   paired.layout3 <- tab.paired(d=기준값, y1=ACVR, y2=DEFB, data=a)
+#   return(list(paired.layout1, paired.layout2, paired.layout3))
+# })
+
+
+paired_layouts <- lapply(alist, function(a){
+  paired.layout1 <- tab.paired(d=기준값, y1=`BAT-26`, y2=ACVR, data=a)
+  paired.layout2 <- tab.paired(d=기준값, y1=ACVR, y2=DEFB, data=a)
+  paired.layout3 <- tab.paired(d=기준값, y1=DEFB, y2=`BAT-26`, data=a)
+  return(list(paired.layout1, paired.layout2, paired.layout3))
+})
+
+paired_layouts
+
+
+t<- paired_layouts[[1]]
+tt <- t[[1]]
+class(tt)
+names(tt)
+
+tt$diseased
+
+mcnem.results <- lapply(paired_layouts2, function(p){
+  each_cancer_out <- lapply(p, function(l){
+    
+    
+    sens <- round(sesp.mcnemar(l)$sensitivity[5], 3)
+    spec <- round(sesp.mcnemar(l)$specificity[5], 3)
+    # #sens <- c(round(sesp.mcnemar(l)$sensitivity[1]*100, 1), round(sesp.mcnemar(l)$sensitivity[5] , 3))
+    # names(sens)[1] <- "sensitivity"
+    # #spec <- c(round(sesp.mcnemar(l)$specificity[1]*100, 1), round(sesp.mcnemar(l)$specificity[5] , 3))
+    # spec <- round(sesp.mcnemar(l)$specificity[1]*100, 1)
+    # names(spec)[1] <- "specificity"
+    out <- c(sens, spec)
+    #names(out) <- c("sensitivity", "specificity")
+  }) %>% do.call(rbind, .)
+  
+  names(each_cancer_out) <- c("sensitivity", "specificity")
+  
+  rownames(each_cancer_out) <- c("BAT-26 - ACVR", "ACVR - DEFB105A/B ", "DEFB105A/B - DEFB")
+  each_cancer_out
+ })%>%  do.call(cbind, .) #%>% rbind(colnames(.), .)
+
+colnames(mcnem.results) <- rep(c("sensitivity", "specificity"),3)
+mcnem.results <- mcnem.results %>% rbind(colnames(.), .)
+colnames(mcnem.results) <- c("Colon", rep("", 1), "Gastric", rep("", 1), "Endometrial", rep("", 1))
+
+
+mcnem.results 
+
+
+sens_spec_results <- lapply(paired_layouts2, function(p){
+  each_cancer_out <- lapply(p, function(l){
+    sens <- round(sesp.mcnemar(l)$sensitivity[1]*100, 1)
+    #sens <- c(round(sesp.mcnemar(l)$sensitivity[1]*100, 1), round(sesp.mcnemar(l)$sensitivity[5] , 3))
+    names(sens)[1] <- "sensitivity"
+    #spec <- c(round(sesp.mcnemar(l)$specificity[1]*100, 1), round(sesp.mcnemar(l)$specificity[5] , 3))
+    spec <- round(sesp.mcnemar(l)$specificity[1]*100, 1)
+    names(spec)[1] <- "specificity"
+    out <- c(sens, spec)
+    out
+  }) %>% do.call(rbind, .)
+  
+  rownames(each_cancer_out) <- c("BAT-26", "ACVR", "DEFB105A/B")
+  each_cancer_out
+ }) %>%  do.call(cbind, .) %>% rbind(colnames(.), .)
+
+sens_spec_results
+
+colnames(sens_spec_results) <- c("Colon", rep("", 1), "Gastric", rep("", 1), "Endometrial", rep("", 1))
+sens_spec_results
+
+out <- sens_spec_results %>% data.table() 
+out
+out %>% openxlsx::write.xlsx(., "cancer_table.xlsx")
+
+library(rvg);library(officer)
+
+doc <- read_pptx() %>%
+  add_slide(layout = "Title Slide", master = "Office Theme") %>%
+  ph_with(value = out, location = ph_location_label(ph_label = "Title 1")) %>%
+  print(target = "~/R-skku-biohrs/sensitivity_specificity.pptx")
+
+# doc
+```
+
+Output compare
+
+Colon - specificity - ACVR & DEFB105A/B Gastric - sensitivity - ACVR & DEFB105A/B Gastric - specificity - ACVR & DEFB105A/B (DEFB105A/B is completely different) Gastric - specificity - (DEFB105A/B is completely different)
+
+## Double check
+
+```{r}
+a[기준값 ==1, lapply(.SD, function(x){sum(x)/.N * 100}), .SDcols = c("BAT-26", "ACVR", "DEFB")]
+a[기준값 ==0, lapply(.SD, function(x){100 - sum(x)/.N * 100}), .SDcols = c("BAT-26", "ACVR", "DEFB")]
+
+
+out <- lapply(alist, function(a){
+  sens <- round(a[기준값 ==1, lapply(.SD, function(x){sum(x)/.N * 100}), .SDcols = c("BAT-26", "ACVR", "DEFB")], 2)
+  spec <- round(a[기준값 ==0, lapply(.SD, function(x){100 - sum(x)/.N * 100}), .SDcols = c("BAT-26", "ACVR", "DEFB")], 2)
+  return(c(sens, spec))
+}) %>% do.call(cbind, .)
+
+rownames(out) <- c("Sensitivity", rep("",2), "Speciticity", rep("",2))
+out
+
+```
+
+## checking smh
+
+```{r}
+
+# This is wrong
+# 
+# 
+# 
+# paired_layouts <- lapply(alist, function(a){
+#   paired.layout1 <- tab.paired(d=기준값, y1=`BAT-26`, y2=ACVR, data=a)
+#   paired.layout2 <- tab.paired(d=기준값, y1=`BAT-26`, y2=DEFB, data=a)
+#   paired.layout3 <- tab.paired(d=기준값, y1=ACVR, y2=DEFB, data=a)
+#   return(list(paired.layout1, paired.layout2, paired.layout3))
+# })
+# 
+# paired_layouts
+# 
+# mcnem.results <- lapply(paired_layouts, function(p){
+#   each_cancer_out <- lapply(p, function(l){
+#     #sens <- round(sesp.mcnemar(l)$sensitivity[c(1,5)], 3) * 100
+#     sens <- c(round(sesp.mcnemar(l)$sensitivity[1]*100, 1), round(sesp.mcnemar(l)$sensitivity[5] , 3))
+#     names(sens)[1] <- "sensitivity"
+#     #spec <- round( c(sesp.mcnemar(l)$specificity[1]*100, sesp.mcnemar(l)$specificity[5]) , 1)
+#     spec <- c(round(sesp.mcnemar(l)$specificity[1]*100, 1), round(sesp.mcnemar(l)$specificity[5] , 3))
+#     names(spec)[1] <- "specificity"
+#     out <- c(sens, spec)
+#     out
+#   }) %>% do.call(rbind, .)
+#   
+#   rownames(each_cancer_out) <- c("BAT-26", "ACVR", "DEFB105A/B")
+#   each_cancer_out
+#  }) %>%  do.call(cbind, .) %>% rbind(colnames(.), .)
+# 
+# colnames(mcnem.results) <- c("Colon", rep("", 3), "Gastric", rep("", 3), "Endometrial", rep("", 3))
+# mcnem.results
+
+
+```
+
+```{r}
+alist
+names(alist)
+
+
+mcnem.results
+
+```
+
+```{r}
+a <- alist[[1]]
+a
+
+dd <- a
+paired.layout1 <- tab.paired(d=기준값, y1=`BAT-26`, y2=ACVR, data=a)
+
+paired.layout1
+
+gold_T <- as.numeric(a$기준값 == 1)
+gold_T
+test1_T <- as.numeric(a$`BAT-26` == 1)
+test1_T
+test1_Pos <- as.numeric(gold_T & test1_T)
+test1_Pos
+
+sum(test1_Pos)
+
+gold_F <- as.numeric(a$기준값 == 0)
+test1_F <- as.numeric(a$`BAT-26` == 0)
+
+test1_Neg <- 
+
+paired.layout1
+
+
+hasCondition <- (a$기준값 == 1)
+notHaveCondition <- (a$기준값 == 0)
+positive <- (a$`BAT-26` == 1)
+negative <- (a$`BAT-26` == 0)
+
+TP <- sum(hasCondition & positive)
+FN <- sum(hasCondition & negative)
+TN <- sum(notHaveCondition & negative)
+FP <- sum(notHaveCondition & positive)
+
+TP
+FN
+
+TN
+FP
+
+sensitivity = TP/(TP+FN)
+sensitivity
+specificity = FP/(FP+TN)
+specificity
+```
+
+```{r}
+
+a = alist[[1]]
+
+a = alist[[2]]
+
+a = alist[[3]]
+
+
+
+a[기준값 ==1, lapply(.SD, function(x){sum(x)/.N * 100}), .SDcols = c("BAT-26", "ACVR", "DEFB")]
+a[기준값 ==0, lapply(.SD, function(x){100 - sum(x)/.N * 100}), .SDcols = c("BAT-26", "ACVR", "DEFB")]
+```
+
+```{r}
+# with BAT
+
+hasCondition <- (a$기준값 == 1)
+notHaveCondition <- (a$기준값 == 0)
+positive <- (a$`BAT-26` == 1)
+negative <- (a$`BAT-26` == 0)
+
+
+
+TP <- sum(hasCondition & positive)
+FN <- sum(hasCondition & negative)
+TN <- sum(notHaveCondition & negative)
+FP <- sum(notHaveCondition & positive)
+
+TP
+FN
+
+TN
+FP
+
+sensitivity = TP/(TP+FN)
+sensitivity
+specificity = FP/(FP+TN)
+specificity
+
+```
+
+```{r}
+#with  ACVR
+hasCondition <- (a$기준값 == 1)
+notHaveCondition <- (a$기준값 == 0)
+positive <- (a$ACVR == 1)
+negative <- (a$ACVR == 0)
+
+TP <- sum(hasCondition & positive)
+FN <- sum(hasCondition & negative)
+TN <- sum(notHaveCondition & negative)
+FP <- sum(notHaveCondition & positive)
+
+TP
+FN
+
+TN
+FP
+
+sensitivity = TP/(TP+FN)
+sensitivity
+specificity = FP/(FP+TN)
+specificity
+```
+
+```{r}
+#with  DEFB
+hasCondition <- (a$기준값 == 1)
+notHaveCondition <- (a$기준값 == 0)
+positive <- (a$DEFB == 1)
+negative <- (a$DEFB == 0)
+
+TP <- sum(hasCondition & positive)
+FN <- sum(hasCondition & negative)
+TN <- sum(notHaveCondition & negative)
+FP <- sum(notHaveCondition & positive)
+
+TP
+FN
+
+TN
+FP
+
+sensitivity = TP/(TP+FN)
+sensitivity
+specificity = FP/(FP+TN)
+specificity
+```
+
+```{r}
+# cancer_name = names(alist)
+# cancer_name
+# 
+# l = alist[[1]]
+# l
+# n = names(l)[3:6]
+# n
+# tables <- lapply(alist, function(l){
+#   
+#   
+#   tt <- lapply(names(l)[3:6], function(n){
+#     
+#     lists <- (l[,get(n)])
+#     names(lists) <- names(l)
+#     lists
+#   }) %>% do.call(cbind,.) 
+#   
+#   
+# 
+#   
+# })
+# tables
+
+```
+
+```{r}
+library(magrittr);library(data.table)
+
+
+alist <- lapply(1:3, function(x){readxl::read_excel("data/data.xlsx", sheet = x) %>% data.table})
+names(alist) <- readxl::excel_sheets("data/data.xlsx")
+
+alist
+
+
+
+
+library(DTComPair)
+
+
+DTComPair::sesp.mcnemar()
+
+dd <- alist[[1]]
+dd
+df_names <- names(dd)
+df_names
+class(dd$`BAT-26`)
+
+
+paired.layout1 <- tab.paired(d=기준값, y1=`BAT-26`, y2=ACVR, data=dd)
+paired.layout2 <- tab.paired(d=기준값, y1=`BAT-26`, y2=DEFB, data=dd)
+paired.layout3 <- tab.paired(d=기준값, y1=ACVR, y2=DEFB, data=dd)
+
+
+
+paired.layout1
+class(paired.layout1)
+
+mcnem.results1 <- sesp.mcnemar(paired.layout1)
+mcnem.results1
+
+a = alist[[1]]
+a = alist[[2]]
+a = alist[[3]]
+
+paired_layouts <- lapply(alist, function(a){
+  paired.layout1 <- tab.paired(d=기준값, y1=`BAT-26`, y2=ACVR, data=a)
+  paired.layout2 <- tab.paired(d=기준값, y1=`BAT-26`, y2=DEFB, data=a)
+  paired.layout3 <- tab.paired(d=기준값, y1=ACVR, y2=DEFB, data=a)
+  
+  return(list(paired.layout1, paired.layout2, paired.layout3))
+})
+paired_layouts
+
+paired.layout1
+
+class(paired.layout1)
+paired_layouts
+names(paired_layouts)
+paired_layouts[[1]]
+
+#paired_layout_list <- list(paired.layout1, paired.layout2, paired.layout3)
+
+mcnem.results <- lapply(paired_layouts, function(l){
+  out <- sesp.mcnemar(l)
+})
+
+mcnem.results
+
+out <- lapply(mcnem.results, function(r){
+  print(r)
+  
+})
+
+out
+
+
+
+
+
+data(Paired1) # Hypothetical study data
+Paired1
+
+head(Paired1)
+ftable(Paired1)
+names(Paired1)
+paired.layout <- tab.paired(d=d, y1=y1, y2=y2, data=Paired1)
+paired.layout 
+mcnem.results <- sesp.mcnemar(paired.layout)
+str(mcnem.results)
+mcnem.results
+mcnem.results$sensitivity["p.value"]
+
+
+# out <- lapply(alist, function(dd){
+#   
+#   tb <- ftable(dd)
+#   tb
+#   tab.paired(d=d, y1=y1, y2=y2, data=dd)
+#   
+#   DTComPair::sesp.mcnemar(tb)
+#  
+# })
+
+
+mcnem.results
+
+cancer_name <- names(mcnem.results)
+
+
+
+cancer_name <- names(mcnem.results)
+cancer_name
+
+mcnem.results
+
+
+# rownames(mcnem.results) <- c("BAT-26", "ACVR", "DEFB105A/B")
+mcnem.results
+
+
+
+out <- lapply(mcnem.results, function(r){
+  print(r)
+  # sensitivity_pval <- r$sensitivity["p.value"]
+  # specificity_pval <- r$specificity["p.value"]
+  # 
+  # return(list(sensitivity_pval,specificity_pval))
+  
+})
+
+
+mcnem.results
+
+names(mcnem.results$Colon)
+mcnem.results$Colon$sensitivity["p.value"]
+mcnem.results$Colon$specificity
+is.vector(mcnem.results$Colon$specificity)
+
+out <- lapply(mcnem.results, function(r){
+  sensitivity_pval <- r$sensitivity["p.value"]
+  specificity_pval <- r$specificity["p.value"]
+  
+  return(list(sensitivity_pval,specificity_pval))
+  
+}) %>% do.call(rbind, .)
+
+out
+colnames(out) <- c("sensitivity p-value", "specificity p-value")
+
+out
+
+```
+
+
+
+
+```{r}
+data(Paired1) # Hypothetical study data
+ftable(Paired1)
+paired.layout <- tab.paired(d=d, y1=y1, y2=y2, data=Paired1)
+paired.layout 
+mcnem.results <- sesp.mcnemar(paired.layout)
+str(mcnem.results)
+mcnem.results
+mcnem.results$sensitivity["p.value"]
+
+
+
+```
+

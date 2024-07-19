@@ -13,6 +13,6 @@ Interactive R Shiny Web Application: https://intern.zarathu.com/shiny/minhyukkim
 
 ## 4. A Longitudinal‬ Study on the Natural History of Spinal Tumors in Neurofibromatosis Type‬ 1
 
-## Polygenic Risk Score (PRS) study with Korean Genome and Epidemiology Study (KoGES) dataset
+## 5. Polygenic Risk Score (PRS) study with Korean Genome and Epidemiology Study (KoGES) dataset
 
 Interactive R Shiny Web Application: https://intern.zarathu.com/shiny/minhyukkim/smc-jihyunbaek/BOMICS_drugresponse/BOMICS_final/

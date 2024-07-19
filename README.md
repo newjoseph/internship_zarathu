@@ -7,6 +7,8 @@
 
 ## 3. Examine the relationship between thyroid hormone (TH)‬‭ sensitivity, metabolic markers, and fatty liver index.‬
 
+Thyroid hormone (TH) sensitivity study's using TFQI & PTFQI.
+
 Interactive R Shiny Web Application: https://intern.zarathu.com/shiny/minhyukkim/dongtan_hallym/ccyymm23/Thyroid/
 
 ## 4. A Longitudinal‬ Study on the Natural History of Spinal Tumors in Neurofibromatosis Type‬ 1

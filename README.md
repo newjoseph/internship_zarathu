@@ -16,7 +16,7 @@
 * Thyroid hormone (TH) sensitivity study's using TFQI & PTFQI using the KNHANES dataset.
 * Conducted quantile and p-trend analyses with ASCVD risk and developed R Shiny web app.
 
-Interactive R Shiny Web Application: https://intern.zarathu.com/shiny/minhyukkim/dongtan_hallym/ccyymm23/Thyroid/
+* Interactive R Shiny Web Application: https://intern.zarathu.com/shiny/minhyukkim/dongtan_hallym/ccyymm23/Thyroid/
 
 ## 4. A Longitudinal‬ Study on the Natural History of Spinal Tumors in Neurofibromatosis Type‬ 1
 
@@ -26,7 +26,7 @@ Interactive R Shiny Web Application: https://intern.zarathu.com/shiny/minhyukkim
 ## 5. Polygenic Risk Score (PRS) study with Korean Genome and Epidemiology Study (KoGES) dataset
 
 * Samsung Medical Center
-Interactive R Shiny Web Application: https://intern.zarathu.com/shiny/minhyukkim/smc-jihyunbaek/BOMICS_drugresponse/BOMICS_final/
+* Interactive R Shiny Web Application: https://intern.zarathu.com/shiny/minhyukkim/smc-jihyunbaek/BOMICS_drugresponse/BOMICS_final/
 
 ## 6. Sample size calculation with McNemar test
 * Statistical support to calculate a proper sample size with a specific power and get an appropriate odds ratio.

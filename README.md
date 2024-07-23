@@ -29,5 +29,5 @@ Interactive R Shiny Web Application: https://intern.zarathu.com/shiny/minhyukkim
 Interactive R Shiny Web Application: https://intern.zarathu.com/shiny/minhyukkim/smc-jihyunbaek/BOMICS_drugresponse/BOMICS_final/
 
 ## 6. Sample size calculation with McNemar test
-* Statistical support to calculate a proper sample size with a specific cal
+* Statistical support to calculate a proper sample size with a specific power and get an appropriate odds ratio.
 * Yonsei University Health System

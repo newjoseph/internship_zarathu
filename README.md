@@ -8,7 +8,7 @@
 
 ## 2. The effect of dietary food intake on the age-related intraocular pressure changes‬ in healthy Korean population: a longitudinal large cohort study
 
- Analyzed the relationship between IOP and multiple diet quality scores‬‭ using Linear Mixed Model for repeated measure‬
+* Analyzed the relationship between IOP and multiple diet quality scores‬‭ using Linear Mixed Model for repeated measure‬
 * Samsung Medical Center
 
 ## 3. Examine the relationship between thyroid hormone (TH)‬‭ sensitivity, metabolic markers, and fatty liver index.‬

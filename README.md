@@ -2,7 +2,7 @@
 
 ##  1. Prediction Model for 6-Month Mortality in Incident Older Hemodialysis‬‭ Patients in South Korea‬
 
-‭* Advanced the development of a prediction model for mortality in incident older hemodialysis patients.
+* Advanced the development of a prediction model for mortality in incident older hemodialysis patients.
 * Demonstrated superiority of Korean Society of Geriatric Nephrology (KSGN) score over existing Tharmar and Wick scores using multiple logistic regression with variable selection method and ROC and AUC curves.
 
 
